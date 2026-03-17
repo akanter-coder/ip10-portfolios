@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>IP10 Market — March Madness</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c14;--bg2:#0d1120;--bg3:#121828;--bg4:#182030;
+  --border:#1a2540;--border2:#243560;
+  --green:#00e676;--red:#ff3d57;--gold:#ffd700;--blue:#4fc3f7;--purple:#b388ff;
+  --text:#e8eaf0;--muted:#5a6a8a;--accent:#4fc3f7;
+  --up:#00e676;--dn:#ff3d57;
+}
+html{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font-size:14px;overflow-x:hidden}
+body{min-height:100vh}
+
+/* TICKER */
+.ticker-wrap{background:var(--bg2);border-bottom:1px solid var(--border);overflow:hidden;height:34px;display:flex;align-items:center}
+.ticker-inner{display:flex;animation:ticker 60s linear infinite;white-space:nowrap}
+.ticker-item{padding:0 20px;font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.05em;display:flex;gap:6px;align-items:center;border-right:1px solid var(--border)}
+.t-name{color:var(--muted)}.t-val{font-weight:700}.t-chg.up{color:var(--up)}.t-chg.dn{color:var(--dn)}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* NAV */
+nav{background:rgba(13,17,32,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:54px;position:sticky;top:0;z-index:300}
+.nav-logo{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;letter-spacing:.1em;color:var(--text);display:flex;align-items:center;gap:8px}
+.nav-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;display:inline-block;box-shadow:0 0 8px var(--accent)}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:transparent;transition:all .18s;letter-spacing:.04em;text-transform:uppercase}
+.nav-tab.active,.nav-tab:hover{background:var(--bg3);color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-user{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:4px 12px 4px 6px;cursor:pointer}
+.nav-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000}
+.nav-uname{font-size:12px;font-weight:600;text-transform:capitalize}
+.nav-logout{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:0}
+.nav-logout:hover{color:var(--dn)}
+.nav-date{font-size:11px;color:var(--muted)}
+
+/* MAIN */
+.main{max-width:1400px;margin:0 auto;padding:22px 18px}
+.view{display:none}.view.active{display:block}
+
+/* LOGIN SCREEN */
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center}
+.login-box{width:min(480px,92vw);background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:40px 36px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.login-logo{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;letter-spacing:.12em;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.login-logo .dot{width:10px;height:10px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.login-sub{color:var(--muted);font-size:13px;margin-bottom:32px}
+.login-label{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.investor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.investor-btn{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 8px;cursor:pointer;text-align:center;transition:all .18s;color:var(--text)}
+.investor-btn:hover{border-color:var(--accent);background:rgba(79,195,247,.08);transform:translateY(-1px)}
+.investor-btn .ib-name{font-weight:600;font-size:13px;text-transform:capitalize;margin-bottom:2px}
+.investor-btn .ib-wave{font-size:10px;color:var(--muted)}
+.login-divider{border-top:1px solid var(--border);margin:20px 0;text-align:center;position:relative}
+.login-divider span{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--bg2);padding:0 10px;font-size:11px;color:var(--muted)}
+.login-admin{display:flex;gap:8px}
+.login-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;font-family:'Barlow',sans-serif}
+.login-input:focus{outline:none;border-color:var(--accent)}
+.btn-primary{background:var(--accent);color:#000;border:none;border-radius:8px;padding:10px 20px;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.04em;transition:opacity .18s}
+.btn-primary:hover{opacity:.85}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.stat-card .sc-label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.stat-card .sc-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800}
+.stat-card .sc-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* LEADERBOARD */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.badge{font-size:10px;background:var(--bg3);border:1px solid var(--border2);padding:3px 10px;border-radius:20px;color:var(--muted);font-family:'Barlow',sans-serif;font-weight:500;text-transform:none;letter-spacing:0}
+.lb-table{width:100%;border-collapse:collapse}
+.lb-table th{background:var(--bg3);padding:9px 14px;text-align:left;font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.lb-table td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.lb-table tr:hover td{background:rgba(79,195,247,.04);cursor:pointer}
+.lb-table tr.highlighted td{background:rgba(79,195,247,.07)!important;border-left:2px solid var(--accent)}
+.lb-table tr.top1 td{background:rgba(255,215,0,.04)}
+.lb-table tr.top2 td{background:rgba(192,192,192,.03)}
+.lb-table tr.top3 td{background:rgba(205,127,50,.03)}
+.rank-badge{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px}
+.rank-badge.r1{background:linear-gradient(135deg,#ffd700,#f59e0b);color:#000}
+.rank-badge.r2{background:linear-gradient(135deg,#c0c0c0,#9e9e9e);color:#000}
+.rank-badge.r3{background:linear-gradient(135deg,#cd7f32,#a0522d);color:#fff}
+.rank-badge.rn{background:var(--bg3);color:var(--muted)}
+.investor-name{font-weight:600;font-size:14px;text-transform:capitalize}
+.wave-chip{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:700;letter-spacing:.04em}
+.wave-chip.w1{background:rgba(79,195,247,.15);color:var(--blue)}
+.wave-chip.w2{background:rgba(0,230,118,.12);color:var(--green)}
+.wave-chip.w3{background:rgba(255,215,0,.12);color:var(--gold)}
+.pv{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700}
+.chg{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:2px}
+.chg.up{color:var(--up)}.chg.dn{color:var(--dn)}
+.mini-bar{height:3px;border-radius:2px;margin-top:4px}
+.hp{display:flex;flex-wrap:wrap;gap:3px}
+.h-chip{font-size:10px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:2px 5px;color:var(--muted)}
+.view-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 12px;font-size:11px;color:var(--accent);cursor:pointer;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.view-btn:hover{background:rgba(79,195,247,.1)}
+
+/* MARKET */
+.market-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:24px}
+.team-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 15px;cursor:default;transition:all .18s;position:relative}
+.team-card.up-card{border-left:3px solid var(--up)}
+.team-card.dn-card{border-left:3px solid var(--dn)}
+.tc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;margin-bottom:3px}
+.tc-price{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;margin:2px 0}
+.tc-meta{display:flex;justify-content:space-between;align-items:center}
+.tc-chg{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700}
+.tc-chg.up{color:var(--up)}.tc-chg.dn{color:var(--dn)}
+.tc-vol{font-size:10px;color:var(--muted)}
+.vol-bar{height:3px;border-radius:2px;margin-top:7px;background:var(--bg3)}
+.vol-fill{height:100%;border-radius:2px}
+
+/* PORTFOLIO PAGE */
+#view-portfolio .port-header{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:18px;position:relative;overflow:hidden}
+#view-portfolio .port-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--purple))}
+.port-name{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;text-transform:capitalize;letter-spacing:.04em}
+.port-meta{display:flex;gap:10px;margin-top:6px;align-items:center;flex-wrap:wrap}
+.port-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.ps{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px 15px}
+.ps .pl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.ps .pv2{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800}
+.ps .pv2.up{color:var(--up)}.ps .pv2.dn{color:var(--dn)}
+.port-rank-badge{background:linear-gradient(135deg,var(--accent),var(--purple));color:#000;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:14px;padding:4px 14px;border-radius:20px}
+
+/* HOLDINGS TABLE */
+.holdings-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.hs-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.hs-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.h-table{width:100%;border-collapse:collapse}
+.h-table th{background:var(--bg3);padding:9px 16px;text-align:left;font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.h-table td{padding:11px 16px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.h-table tr:last-child td{border-bottom:none}
+.h-pct-bar{height:3px;border-radius:2px;background:var(--bg3);margin-top:3px}
+.h-pct-fill{height:100%;border-radius:2px;background:var(--accent)}
+
+/* REBALANCE */
+.rebalance-section{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.rb-header{padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(79,195,247,.04);display:flex;justify-content:space-between;align-items:center}
+.rb-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.rb-grid{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.rb-team{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.rb-team-name{font-weight:600;font-size:12px;margin-bottom:2px}
+.rb-price{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px}
+.rb-input-row{display:flex;align-items:center;gap:6px}
+.rb-input{width:60px;background:var(--bg4);border:1px solid var(--border2);border-radius:5px;padding:4px 8px;color:var(--text);font-size:12px;font-family:'Barlow',sans-serif;text-align:center}
+.rb-input:focus{outline:none;border-color:var(--accent)}
+.rb-input-label{font-size:10px;color:var(--muted)}
+.rb-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.rb-budget{font-size:13px}
+.rb-budget .rb-left{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700}
+.rb-budget .rb-left.ok{color:var(--up)}.rb-budget .rb-left.over{color:var(--dn)}
+.btn-rebalance{background:var(--accent);color:#000;border:none;border-radius:8px;padding:10px 22px;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:opacity .18s}
+.btn-rebalance:hover{opacity:.85}
+.btn-rebalance:disabled{opacity:.4;cursor:not-allowed}
+
+/* AI TIPS */
+.tips-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.tips-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.tips-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.tips-body{padding:16px 20px}
+.tips-loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;padding:20px 0}
+.dots-anim span{animation:dotpulse 1.4s infinite;opacity:0;font-size:18px;color:var(--accent)}
+.dots-anim span:nth-child(2){animation-delay:.2s}
+.dots-anim span:nth-child(3){animation-delay:.4s}
+@keyframes dotpulse{0%,100%{opacity:0}50%{opacity:1}}
+.tip-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden}
+.tip-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.tip-card.buy::before{background:var(--up)}
+.tip-card.sell::before{background:var(--dn)}
+.tip-card.hold::before{background:var(--gold)}
+.tip-card.info::before{background:var(--accent)}
+.tip-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.tip-label.buy{color:var(--up)}.tip-label.sell{color:var(--dn)}.tip-label.hold{color:var(--gold)}.tip-label.info{color:var(--accent)}
+.tip-text{font-size:13px;line-height:1.6;color:var(--text)}
+.btn-tips{background:linear-gradient(135deg,rgba(79,195,247,.15),rgba(179,136,255,.15));border:1px solid var(--border2);border-radius:8px;padding:8px 18px;font-size:12px;font-weight:700;color:var(--accent);cursor:pointer;letter-spacing:.05em;text-transform:uppercase;transition:all .18s}
+.btn-tips:hover{background:rgba(79,195,247,.2)}
+
+/* ALERTS */
+.alert-section{margin-bottom:18px}
+.alert-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.alert-text{font-size:13px;line-height:1.5}
+.alert-text strong{color:var(--text)}
+.alert-text span{color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:14px 20px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--up);color:var(--up)}
+.toast.error{border-color:var(--dn);color:var(--dn)}
+
+@media(max-width:768px){
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+  .market-grid{grid-template-columns:repeat(2,1fr)}
+  .lb-table th:nth-child(5),.lb-table td:nth-child(5),.lb-table th:nth-child(6),.lb-table td:nth-child(6){display:none}
+  .investor-grid{grid-template-columns:repeat(2,1fr)}
+  .port-stats{grid-template-columns:repeat(2,1fr)}
+  .rb-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><span class="dot"></span>IP10 MARKET</div>
+    <div class="login-sub">March Madness Portfolio Simulator · Select your name to continue</div>
+    <div class="login-label" id="loginWaveLabel">Select Your Name</div>
+    <div class="investor-grid" id="investorGrid"></div>
+    <!-- PASSWORD STEP -->
+    <div id="passwordStep" style="display:none">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Logging in as</div>
+        <div id="pwdInvName" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:capitalize;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent"></div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div class="login-label" style="margin-bottom:8px">Enter Your Password</div>
+        <input class="login-input" id="pwdInput" type="password" placeholder="Enter your password..." style="width:100%;margin-bottom:8px"/>
+        <div id="pwdError" style="color:var(--dn);font-size:12px;min-height:16px;text-align:center"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button id="pwdBackBtn" class="btn-secondary" style="flex:1;padding:10px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:13px">← Back</button>
+        <button id="pwdSubmitBtn" class="btn-primary" style="flex:2;padding:10px;border-radius:8px;border:none;background:var(--grad);color:#fff;font-weight:700;font-size:14px">Login →</button>
+      </div>
+    </div>
+    <div class="login-divider"><span>or admin view</span></div>
+    <div class="login-admin">
+      <input class="login-input" id="adminPwd" placeholder="Enter admin password..." type="password" onkeydown="if(event.key==='Enter')adminLogin()"/>
+      <button class="btn-primary" onclick="adminLogin()">Enter</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- TICKER -->
+<div class="ticker-wrap"><div class="ticker-inner" id="tickerInner"></div></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span class="dot"></span>IP10 MARKET</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tabLeaderboard" onclick="showView('leaderboard',this)">🏆 Leaderboard</button>
+    <button class="nav-tab" id="tabMarket" onclick="showView('market',this)">📈 Market</button>
+    <button class="nav-tab" id="tabPortfolio" onclick="showView('portfolio',this)" style="display:none">💼 My Portfolio</button>
+  </div>
+  <div class="nav-right">
+    <div id="navUserArea" style="display:none" class="nav-user" onclick="showView('portfolio',document.getElementById('tabPortfolio'))">
+      <div class="nav-avatar" id="navAvatar"></div>
+      <span class="nav-uname" id="navName"></span>
+      <button class="nav-logout" onclick="event.stopPropagation();logout()">✕</button>
+    </div>
+    <div class="nav-date">Mar 12, 2025</div>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- LEADERBOARD VIEW -->
+  <div class="view active" id="view-leaderboard">
+    <div class="stat-row" id="statCards"></div>
+    <div class="section-hd">
+      <div class="section-title">🏆 Leaderboard <span class="badge">March 12 Prices · 22 Investors</span></div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="lb-table">
+        <thead><tr>
+          <th style="width:40px">#</th>
+          <th>Investor</th>
+          <th>Portfolio Value</th>
+          <th>Change</th>
+          <th>Top Holdings</th>
+          <th></th>
+        </tr></thead>
+        <tbody id="lbBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MARKET VIEW -->
+  <div class="view" id="view-market">
+    <div class="section-hd">
+      <div class="section-title">📊 Team Market <span class="badge">25 Teams · Mar 12 Update</span></div>
+    </div>
+    <div class="market-grid" id="marketGrid"></div>
+  </div>
+
+  <!-- PORTFOLIO VIEW -->
+  <div class="view" id="view-portfolio" style="display:none">
+    <div id="portfolioContent"></div>
+  </div>
+
+</div>
+
+<script>
+const INVESTORS_BASE = [{"name": "judah", "wave": "Wave 1", "holdings": {"St. Johns": 12.0}, "portfolio_value": 565.14, "prev_value": 489.46, "change": 75.67, "pct_change": 15.46, "rank": 1}, {"name": "julien", "wave": "Wave 1", "holdings": {"Michigan": 1.0, "Arizona": 1.0, "Gonzaga": 5.0, "Duke": 0.41, "Virginia": 1.0, "Arkansas": 1.0, "Miami": 1.0}, "portfolio_value": 507.87, "prev_value": 499.44, "change": 8.43, "pct_change": 1.69, "rank": 2}, {"name": "mathis", "wave": "Wave 2", "holdings": {"Michigan": 3.0, "Duke": 3.0, "BYU": 1.1448}, "portfolio_value": 504.47, "prev_value": 500.0, "change": 4.48, "pct_change": 0.9, "rank": 3}, {"name": "cem", "wave": "Wave 2", "holdings": {"Arizona": 0.864, "Iowa St.": 1.0, "Duke": 2.0, "Illinois": 3.0, "Miami": 4.655}, "portfolio_value": 486.23, "prev_value": 499.96, "change": -13.72, "pct_change": -2.74, "rank": 4}, {"name": "sanders", "wave": "Wave 2", "holdings": {"Miami": 46.0}, "portfolio_value": 475.97, "prev_value": 493.92, "change": -17.95, "pct_change": -3.63, "rank": 5}, {"name": "penelope", "wave": "Wave 1", "holdings": {"Gonzaga": 4.5, "Connecticut": 5.0}, "portfolio_value": 474.51, "prev_value": 496.68, "change": -22.17, "pct_change": -4.46, "rank": 6}, {"name": "nicholas", "wave": "Wave 1", "holdings": {"Michigan": 0.5, "Arizona": 1.0, "Duke": 1.5, "Illinois": 2.0, "BYU": 1.0, "Kansas": 1.5, "St. Johns": 1.0, "Miami": 1.0}, "portfolio_value": 473.97, "prev_value": 494.01, "change": -20.04, "pct_change": -4.06, "rank": 7}, {"name": "peter", "wave": "Wave 2", "holdings": {"Michigan": 1.0, "Arizona": 1.0, "Iowa St.": 1.0, "Gonzaga": 1.0, "Texas Tech": 1.0, "Saint Louis": 1.0, "Clemson": 1.0, "St. Johns": 0.5, "Nebraska": 1.0, "Virginia": 1.0, "Arkansas": 1.0, "Miami": 2.0}, "portfolio_value": 470.91, "prev_value": 499.85, "change": -28.94, "pct_change": -5.79, "rank": 8}, {"name": "abby", "wave": "Wave 3", "holdings": {"Michigan": 1.0, "Iowa St.": 1.0, "Duke": 1.0, "Connecticut": 1.0, "Illinois": 1.0, "Tennessee": 1.0, "North Carolina": 2.0, "Virginia": 1.0, "Miami": 2.0}, "portfolio_value": 469.26, "prev_value": 499.52, "change": -30.25, "pct_change": -6.06, "rank": 9}, {"name": "henri", "wave": "Wave 2", "holdings": {"Michigan": 5.0, "Arizona": 1.0, "Miami": 1.0}, "portfolio_value": 469.25, "prev_value": 483.73, "change": -14.48, "pct_change": -2.99, "rank": 10}, {"name": "chatgpt", "wave": "Wave 2", "holdings": {"Michigan": 2.0, "Duke": 1.0, "Connecticut": 1.0, "Houston": 1.0, "BYU": 1.0, "Tennessee": 1.0, "Kansas": 1.0, "Clemson": 1.0, "Miami": 0.9}, "portfolio_value": 459.02, "prev_value": 499.29, "change": -40.27, "pct_change": -8.07, "rank": 11}, {"name": "brett", "wave": "Wave 2", "holdings": {"Purdue": 2.0, "Duke": 3.0, "Vanderbilt": 1.0, "North Carolina": 3.0, "Miami": 1.0}, "portfolio_value": 457.81, "prev_value": 495.05, "change": -37.24, "pct_change": -7.52, "rank": 12}, {"name": "cole", "wave": "Wave 1", "holdings": {"Michigan": 1.0, "Iowa St.": 2.0, "Duke": 1.0, "Vanderbilt": 5.0, "Houston": 1.0}, "portfolio_value": 454.27, "prev_value": 495.86, "change": -41.59, "pct_change": -8.39, "rank": 13}, {"name": "bea", "wave": "Wave 1", "holdings": {"Gonzaga": 3.0, "Connecticut": 3.0, "BYU": 2.0, "Tennessee": 4.0}, "portfolio_value": 452.15, "prev_value": 496.61, "change": -44.45, "pct_change": -8.95, "rank": 14}, {"name": "bear", "wave": "Wave 1", "holdings": {"Arizona": 2.5, "Connecticut": 2.0, "Vanderbilt": 0.5, "Michigan St.": 0.5, "Tennessee": 1.0, "North Carolina": 3.0}, "portfolio_value": 445.96, "prev_value": 498.37, "change": -52.41, "pct_change": -10.52, "rank": 15}, {"name": "sander", "wave": "Wave 2", "holdings": {"Houston": 4.0, "Michigan St.": 1.0, "Louisville": 5.0}, "portfolio_value": 439.68, "prev_value": 470.41, "change": -30.72, "pct_change": -6.53, "rank": 16}, {"name": "vienna", "wave": "Wave 2", "holdings": {"Michigan": 0.5314, "Gonzaga": 1.0, "Connecticut": 1.5, "Houston": 1.0, "Tennessee": 1.0, "Kansas": 2.0, "North Carolina": 3.0}, "portfolio_value": 430.39, "prev_value": 500.0, "change": -69.6, "pct_change": -13.92, "rank": 17}, {"name": "molly", "wave": "Wave 3", "holdings": {"Michigan": 1.0, "Arizona": 1.0, "Duke": 1.0, "Connecticut": 1.0, "Houston": 1.0, "Kansas": 2.0}, "portfolio_value": 422.83, "prev_value": 450.74, "change": -27.92, "pct_change": -6.19, "rank": 18}, {"name": "mavis", "wave": "Wave 1", "holdings": {"Gonzaga": 3.75, "BYU": 12.0}, "portfolio_value": 413.82, "prev_value": 496.83, "change": -83.0, "pct_change": -16.71, "rank": 19}, {"name": "taylor", "wave": "Wave 1", "holdings": {"Arizona": 1.0, "Connecticut": 1.0, "Tennessee": 1.0, "Kansas": 1.0, "Texas Tech": 1.0, "Saint Louis": 1.0, "North Carolina": 5.0}, "portfolio_value": 401.21, "prev_value": 491.01, "change": -89.8, "pct_change": -18.29, "rank": 20}, {"name": "andrew", "wave": "Wave 2", "holdings": {"Connecticut": 3.0, "Kansas": 2.0, "North Carolina": 5.0}, "portfolio_value": 392.57, "prev_value": 477.17, "change": -84.59, "pct_change": -17.73, "rank": 21}, {"name": "charlotte", "wave": "Wave 1", "holdings": {"Gonzaga": 1.0, "BYU": 2.5, "North Carolina": 9.0}, "portfolio_value": 384.7, "prev_value": 498.66, "change": -113.96, "pct_change": -22.85, "rank": 22}];
+const TEAMS = {"Michigan": {"cur": 77.51, "prev": 79.77, "vol": -0.0283}, "Arizona": {"cur": 71.34, "prev": 74.12, "vol": -0.0375}, "Iowa St.": {"cur": 54.46, "prev": 61.71, "vol": -0.1176}, "Gonzaga": {"cur": 48.18, "prev": 49.0, "vol": -0.0169}, "Purdue": {"cur": 38.56, "prev": 47.79, "vol": -0.1932}, "Duke": {"cur": 83.23, "prev": 76.94, "vol": 0.0818}, "Connecticut": {"cur": 51.54, "prev": 55.23, "vol": -0.0668}, "Vanderbilt": {"cur": 24.68, "prev": 29.79, "vol": -0.1716}, "Illinois": {"cur": 51.84, "prev": 56.78, "vol": -0.0871}, "Houston": {"cur": 61.23, "prev": 66.79, "vol": -0.0832}, "BYU": {"cur": 19.43, "prev": 26.09, "vol": -0.2552}, "Florida": {"cur": 68.82, "prev": 54.08, "vol": 0.2727}, "Michigan St.": {"cur": 55.32, "prev": 53.25, "vol": 0.0389}, "Louisville": {"cur": 27.89, "prev": 30.0, "vol": -0.0704}, "Tennessee": {"cur": 28.53, "prev": 32.93, "vol": -0.1335}, "Kansas": {"cur": 38.98, "prev": 48.95, "vol": -0.2035}, "Texas Tech": {"cur": 42.08, "prev": 42.6, "vol": -0.0122}, "Saint Louis": {"cur": 8.76, "prev": 23.6, "vol": -0.629}, "Clemson": {"cur": 11.73, "prev": 23.16, "vol": -0.4934}, "St. Johns": {"cur": 47.09, "prev": 40.79, "vol": 0.1546}, "North Carolina": {"cur": 31.99, "prev": 42.71, "vol": -0.251}, "Nebraska": {"cur": 38.95, "prev": 45.77, "vol": -0.1489}, "Virginia": {"cur": 37.47, "prev": 29.24, "vol": 0.2813}, "Arkansas": {"cur": 36.19, "prev": 29.0, "vol": 0.2479}, "Miami": {"cur": 10.35, "prev": 10.74, "vol": 0.0363}};
+const ADMIN_PWD = "ip10admin";
+
+let currentUser = null;
+let isAdmin = false;
+// Rebalance state per user (in memory)
+let rebalanceState = {};
+
+// ── INIT ──
+buildTicker();
+buildStats();
+buildLeaderboard();
+buildMarket();
+buildLoginGrid();
+
+function buildLoginGrid(){
+  const g = document.getElementById('investorGrid');
+  g.innerHTML = INVESTORS_BASE.map(inv=>{
+    const wl = inv.wave==='Wave 1'?'w1':inv.wave==='Wave 2'?'w2':'w3';
+    return `<div class="investor-btn" onclick="loginAs('${inv.name}')">
+      <div class="ib-name">${inv.name}</div>
+    </div>`;
+  }).join('');
+}
+
+function loginAs(name){
+  // Show password step
+  const inv = INVESTORS_BASE.find(i=>i.name===name);
+  if(!inv) return;
+  document.getElementById('investorGrid').style.display='none';
+  document.getElementById('loginWaveLabel').style.display='none';
+  document.getElementById('passwordStep').style.display='block';
+  document.getElementById('pwdInvName').textContent = name;
+  document.getElementById('pwdInput').value='';
+  document.getElementById('pwdError').textContent='';
+  document.getElementById('pwdInput').focus();
+  document.getElementById('pwdBackBtn').onclick = () => {
+    document.getElementById('investorGrid').style.display='grid';
+    document.getElementById('loginWaveLabel').style.display='block';
+    document.getElementById('passwordStep').style.display='none';
+  };
+  document.getElementById('pwdSubmitBtn').onclick = () => submitPassword(name);
+  document.getElementById('pwdInput').onkeydown = (e) => { if(e.key==='Enter') submitPassword(name); };
+}
+
+function submitPassword(name){
+  const entered = document.getElementById('pwdInput').value.trim().toLowerCase();
+  const correct = name.toLowerCase();
+  if(entered === correct){
+    currentUser = INVESTORS_BASE.find(i=>i.name===name);
+    isAdmin = false;
+    if(!rebalanceState[name]){
+      rebalanceState[name] = {...currentUser.holdings};
+    }
+    finishLogin();
+  } else {
+    document.getElementById('pwdError').textContent = 'Incorrect password. Hint: your password is your name.';
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdInput').focus();
+  }
+}
+
+function adminLogin(){
+  const pwd = document.getElementById('adminPwd').value;
+  if(pwd === ADMIN_PWD){
+    isAdmin = true; currentUser = null;
+    finishLogin();
+  } else {
+    showToast('Incorrect password','error');
+  }
+}
+
+function finishLogin(){
+  document.getElementById('loginScreen').style.display='none';
+  if(currentUser){
+    document.getElementById('navUserArea').style.display='flex';
+    document.getElementById('navAvatar').textContent = currentUser.name[0].toUpperCase();
+    document.getElementById('navName').textContent = currentUser.name;
+    document.getElementById('tabPortfolio').style.display='';
+    showView('portfolio', document.getElementById('tabPortfolio'));
+    renderPortfolio();
+  }
+}
+
+function logout(){
+  currentUser = null; isAdmin = false;
+  document.getElementById('navUserArea').style.display='none';
+  document.getElementById('tabPortfolio').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('adminPwd').value='';
+  document.getElementById('investorGrid').style.display='grid';
+  document.getElementById('loginWaveLabel').style.display='block';
+  document.getElementById('passwordStep').style.display='none';
+  showView('leaderboard', document.getElementById('tabLeaderboard'));
+}
+
+// ── TICKER ──
+function buildTicker(){
+  const items = Object.entries(TEAMS).map(([name,t])=>{
+    const pct = ((t.cur-t.prev)/t.prev*100).toFixed(1);
+    const cls = t.cur>=t.prev?'up':'dn';
+    const arr = t.cur>=t.prev?'▲':'▼';
+    return `<div class="ticker-item"><span class="t-name">${name}</span><span class="t-val">$${t.cur.toFixed(2)}</span><span class="t-chg ${cls}">${arr}${Math.abs(pct)}%</span></div>`;
+  }).join('');
+  const el = document.getElementById('tickerInner');
+  el.innerHTML = items+items;
+}
+
+// ── STATS ──
+function buildStats(){
+  const vals = INVESTORS_BASE.map(i=>i.portfolio_value);
+  const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+  const top = INVESTORS_BASE[0];
+  const gainers = INVESTORS_BASE.filter(i=>i.change>0).length;
+  document.getElementById('statCards').innerHTML = [
+    {label:'Total Investors',val:INVESTORS_BASE.length,sub:'Across 3 waves'},
+    {label:'Top Portfolio',val:`$${top.portfolio_value.toFixed(2)}`,sub:`${top.name} · #1 Ranked`},
+    {label:'Avg Portfolio',val:`$${avg.toFixed(2)}`,sub:'After Mar 12 update'},
+    {label:'In the Green',val:`${gainers}/${INVESTORS_BASE.length}`,sub:'Investors with gains'},
+  ].map(c=>`<div class="stat-card"><div class="sc-label">${c.label}</div><div class="sc-val">${c.val}</div><div class="sc-sub">${c.sub}</div></div>`).join('');
+}
+
+// ── LEADERBOARD ──
+function buildLeaderboard(){
+  const max = Math.max(...INVESTORS_BASE.map(i=>i.portfolio_value));
+  document.getElementById('lbBody').innerHTML = INVESTORS_BASE.map(inv=>{
+    const rk = inv.rank<=3?`r${inv.rank}`:'rn';
+    const topCls = inv.rank<=3?`top${inv.rank}`:'';
+    const wc = inv.wave==='Wave 1'?'w1':inv.wave==='Wave 2'?'w2':'w3';
+    const cc = inv.change>=0?'up':'dn';
+    const arr = inv.change>=0?'▲':'▼';
+    const bp = (inv.portfolio_value/max*100).toFixed(0);
+    const bc = inv.change>=0?'var(--up)':'var(--dn)';
+    const holdings = Object.entries(inv.holdings).slice(0,3).map(([t])=>`<span class="h-chip">${t}</span>`).join('');
+    const isMe = currentUser && currentUser.name===inv.name;
+    return `<tr class="${topCls}${isMe?' highlighted':''}" onclick="openInvestorPortfolio('${inv.name}')">
+      <td><span class="rank-badge ${rk}">${inv.rank}</span></td>
+      <td><div class="investor-name">${inv.name}${isMe?' <span style="font-size:10px;color:var(--accent)">(you)</span>':''}</div></td>
+      <td><div class="pv">$${inv.portfolio_value.toFixed(2)}</div><div class="mini-bar" style="width:${bp}%;max-width:100px;background:${bc}"></div></td>
+      <td><div class="chg ${cc}">${arr} $${Math.abs(inv.change).toFixed(2)}</div><div style="font-size:11px;color:var(--muted)">${inv.change>=0?'+':''}${inv.pct_change.toFixed(2)}%</div></td>
+      <td><div class="hp">${holdings}</div></td>
+      <td><button class="view-btn" onclick="event.stopPropagation();openInvestorPortfolio('${inv.name}')">View →</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openInvestorPortfolio(name){
+  if(currentUser && currentUser.name===name){
+    showView('portfolio',document.getElementById('tabPortfolio'));
+  } else {
+    // show read-only modal
+    showReadOnlyModal(name);
+  }
+}
+
+function showReadOnlyModal(name){
+  const inv = INVESTORS_BASE.find(i=>i.name===name);
+  if(!inv) return;
+  const existing = document.getElementById('roModal');
+  if(existing) existing.remove();
+  const cc = inv.change>=0?'up':'dn';
+  const arr = inv.change>=0?'▲':'▼';
+  const tv = Object.entries(inv.holdings).reduce((s,[t,q])=>s+(TEAMS[t]?.cur||0)*q,0);
+  const rows = Object.entries(inv.holdings).map(([t,q])=>{
+    const cur=(TEAMS[t]?.cur||0)*q, prev=(TEAMS[t]?.prev||0)*q;
+    const chg=cur-prev; const cc2=chg>=0?'up':'dn'; const a2=chg>=0?'▲':'▼';
+    const pct=tv>0?(cur/tv*100).toFixed(1):0;
+    return `<tr><td><strong>${t}</strong></td><td>×${q}</td><td>$${(TEAMS[t]?.cur||0).toFixed(2)}</td><td><strong>$${cur.toFixed(2)}</strong></td><td style="color:${chg>=0?'var(--up)':'var(--dn)'}">${a2} $${Math.abs(chg).toFixed(2)}</td></tr>`;
+  }).join('');
+  const wc = inv.wave==='Wave 1'?'w1':inv.wave==='Wave 2'?'w2':'w3';
+  const mo = document.createElement('div');
+  mo.id='roModal';
+  mo.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:800;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
+  mo.innerHTML=`<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;width:min(600px,95vw);max-height:82vh;overflow-y:auto;box-shadow:0 25px 80px rgba(0,0,0,.7)">
+    <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg2)">
+      <div><div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;text-transform:capitalize">${inv.name}</div></div>
+      <button onclick="document.getElementById('roModal').remove()" style="background:var(--bg3);border:none;color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">✕</button>
+    </div>
+    <div style="padding:18px 22px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+        <div class="ps"><div class="pl">Value</div><div class="pv2">$${inv.portfolio_value.toFixed(2)}</div></div>
+        <div class="ps"><div class="pl">Change</div><div class="pv2 ${cc}">${arr} $${Math.abs(inv.change).toFixed(2)}</div></div>
+        <div class="ps"><div class="pl">% Change</div><div class="pv2 ${cc}">${inv.change>=0?'+':''}${inv.pct_change.toFixed(2)}%</div></div>
+      </div>
+      <div style="overflow-x:auto"><table class="h-table"><thead><tr><th>Team</th><th>Qty</th><th>Price</th><th>Value</th><th>Chg</th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>
+  </div>`;
+  mo.onclick = e=>{ if(e.target===mo) mo.remove(); };
+  document.body.appendChild(mo);
+}
+
+// ── MARKET ──
+function buildMarket(){
+  document.getElementById('marketGrid').innerHTML = Object.entries(TEAMS).map(([name,t])=>{
+    const chg=t.cur-t.prev, pct=((chg/t.prev)*100).toFixed(1);
+    const cls=chg>=0?'up':'dn', arr=chg>=0?'▲':'▼';
+    const vw=Math.min(Math.abs(t.vol)*200,100).toFixed(0);
+    const vc=t.vol>=0?'var(--up)':'var(--dn)';
+    return `<div class="team-card ${chg>=0?'up-card':'dn-card'}">
+      <div class="tc-name">${name}</div>
+      <div class="tc-price">$${t.cur.toFixed(2)}</div>
+      <div class="tc-meta"><span class="tc-chg ${cls}">${arr} ${Math.abs(pct)}%</span><span class="tc-vol">Vol: ${(t.vol*100).toFixed(1)}%</span></div>
+      <div class="vol-bar"><div class="vol-fill" style="width:${vw}%;background:${vc}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── PORTFOLIO PAGE ──
+function renderPortfolio(){
+  const inv = currentUser;
+  if(!inv){ document.getElementById('portfolioContent').innerHTML='<p style="color:var(--muted);padding:40px">No investor selected.</p>'; return; }
+  const cc = inv.change>=0?'up':'dn';
+  const arr = inv.change>=0?'▲':'▼';
+  const wc = inv.wave==='Wave 1'?'w1':inv.wave==='Wave 2'?'w2':'w3';
+  const rb = rebalanceState[inv.name] || {...inv.holdings};
+  const rbTotal = Object.entries(rb).reduce((s,[t,q])=>s+(TEAMS[t]?.cur||0)*q,0);
+  const budget = 500;
+  const budgetLeft = budget - rbTotal;
+  const tv = Object.entries(inv.holdings).reduce((s,[t,q])=>s+(TEAMS[t]?.cur||0)*q,0);
+
+  // Holdings rows
+  const hRows = Object.entries(inv.holdings).map(([team,qty])=>{
+    const t=TEAMS[team], cur=(t?.cur||0)*qty, prev=(t?.prev||0)*qty;
+    const chg=cur-prev; const cc2=chg>=0?'up':'dn'; const a2=chg>=0?'▲':'▼';
+    const pct=tv>0?(cur/tv*100).toFixed(1):0;
+    return `<tr><td><strong>${team}</strong></td><td style="color:var(--muted)">×${qty}</td><td>$${(t?.cur||0).toFixed(2)}</td><td><strong>$${cur.toFixed(2)}</strong></td><td style="color:${chg>=0?'var(--up)':'var(--dn)'}">${a2} $${Math.abs(chg).toFixed(2)}</td><td><div>${pct}%</div><div class="h-pct-bar"><div class="h-pct-fill" style="width:${pct}%"></div></div></td></tr>`;
+  }).join('');
+
+  // Rebalance grid (all 25 teams)
+  const rbInputs = Object.entries(TEAMS).map(([team,t])=>{
+    const curQty = rb[team] || 0;
+    const chg=t.cur-t.prev, pct=((chg/t.prev)*100).toFixed(1);
+    const cls2=chg>=0?'up':'dn', a3=chg>=0?'▲':'▼';
+    return `<div class="rb-team">
+      <div class="rb-team-name">${team}</div>
+      <div class="rb-price" style="color:${chg>=0?'var(--up)':'var(--dn)'}">$${t.cur.toFixed(2)} <span style="font-size:10px">${a3}${Math.abs(pct)}%</span></div>
+      <div class="rb-input-row">
+        <input class="rb-input" type="number" min="0" step="0.1" value="${curQty}" id="rb_${team.replace(/[^a-zA-Z]/g,'_')}" oninput="updateBudget()" placeholder="0"/>
+        <span class="rb-input-label">shares</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Alerts
+  const alerts = buildAlerts(inv);
+
+  document.getElementById('portfolioContent').innerHTML = `
+    <div class="port-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div>
+          <div class="port-name">${inv.name}'s Portfolio</div>
+          <div class="port-meta">
+            <span class="port-rank-badge">Rank #${inv.rank} of ${INVESTORS_BASE.length}</span>
+            <span style="font-size:12px;color:var(--muted)">Updated Mar 12, 2025</span>
+          </div>
+        </div>
+      </div>
+      <div class="port-stats">
+        <div class="ps"><div class="pl">Portfolio Value</div><div class="pv2">$${inv.portfolio_value.toFixed(2)}</div></div>
+        <div class="ps"><div class="pl">Weekly Change</div><div class="pv2 ${cc}">${arr} $${Math.abs(inv.change).toFixed(2)}</div></div>
+        <div class="ps"><div class="pl">% Change</div><div class="pv2 ${cc}">${inv.change>=0?'+':''}${inv.pct_change.toFixed(2)}%</div></div>
+      </div>
+    </div>
+
+    <div class="alert-section">${alerts}</div>
+
+    <div class="holdings-section">
+      <div class="hs-header">
+        <div class="hs-title">📦 Current Holdings</div>
+        <span style="font-size:11px;color:var(--muted)">${Object.keys(inv.holdings).length} positions</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="h-table">
+          <thead><tr><th>Team</th><th>Qty</th><th>Price</th><th>Value</th><th>Change</th><th>% of Portfolio</th></tr></thead>
+          <tbody>${hRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tips-section">
+      <div class="tips-header">
+        <div class="tips-title">🤖 AI Investment Tips</div>
+        <button class="btn-tips" onclick="loadAITips()">Generate Tips ✦</button>
+      </div>
+      <div class="tips-body" id="tipsBody">
+        <div style="color:var(--muted);font-size:13px;padding:10px 0">Click "Generate Tips" to get personalized AI analysis based on your holdings, March Madness volatility, and market trends.</div>
+      </div>
+    </div>
+
+    <div class="rebalance-section">
+      <div class="rb-header">
+        <div class="rb-title">⚖️ Rebalance Portfolio</div>
+        <span style="font-size:11px;color:var(--muted)">Adjust share quantities · $500 budget</span>
+      </div>
+      <div class="rb-grid" id="rbGrid">${rbInputs}</div>
+      <div class="rb-footer">
+        <div class="rb-budget">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">Budget Remaining</div>
+          <div class="rb-left ok" id="budgetLeft">$${budgetLeft.toFixed(2)}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-tips" onclick="resetRebalance()">Reset</button>
+          <button class="btn-rebalance" id="btnRebalance" onclick="confirmRebalance()">Save Rebalance</button>
+        </div>
+      </div>
+    </div>
+  `;
+  updateBudget();
+}
+
+function buildAlerts(inv){
+  const alerts = [];
+  // Volatility alerts for holdings
+  Object.entries(inv.holdings).forEach(([team, qty])=>{
+    const t = TEAMS[team];
+    if(!t) return;
+    const vol = t.vol;
+    if(vol <= -0.3) alerts.push({icon:'🚨',text:`<strong>${team}</strong> dropped <strong style="color:var(--dn)">${(vol*100).toFixed(1)}%</strong> this week — one of the biggest losers. Consider reducing exposure.`,type:'danger'});
+    else if(vol >= 0.25) alerts.push({icon:'🚀',text:`<strong>${team}</strong> surged <strong style="color:var(--up)">${(vol*100).toFixed(1)}%</strong> this week. Strong momentum heading into March Madness.`,type:'good'});
+  });
+  // Concentration risk
+  const tv = Object.entries(inv.holdings).reduce((s,[t,q])=>s+(TEAMS[t]?.cur||0)*q,0);
+  Object.entries(inv.holdings).forEach(([team,qty])=>{
+    const val = (TEAMS[team]?.cur||0)*qty;
+    if(tv>0 && val/tv > 0.7) alerts.push({icon:'⚠️',text:`<strong>Concentration Risk:</strong> <strong>${team}</strong> makes up <strong>${(val/tv*100).toFixed(0)}%</strong> of your portfolio. High risk if this team underperforms.`,type:'warn'});
+  });
+  // March Madness note
+  alerts.push({icon:'🏀',text:`<span><strong>March Madness is live!</strong> Prices update based on team performance — wins boost value, upsets cause drops. Watch the bracket closely.</span>`,type:'info'});
+  if(alerts.length===0) alerts.push({icon:'✅',text:`Your portfolio looks balanced. No immediate alerts.`,type:'info'});
+  return alerts.slice(0,4).map(a=>`<div class="alert-card"><div class="alert-icon">${a.icon}</div><div class="alert-text">${a.text}</div></div>`).join('');
+}
+
+// ── BUDGET TRACKER ──
+function updateBudget(){
+  let total = 0;
+  Object.entries(TEAMS).forEach(([team,t])=>{
+    const id = 'rb_'+team.replace(/[^a-zA-Z]/g,'_');
+    const el = document.getElementById(id);
+    if(el) total += (parseFloat(el.value)||0) * t.cur;
+  });
+  const left = 500 - total;
+  const el = document.getElementById('budgetLeft');
+  const btn = document.getElementById('btnRebalance');
+  if(el){
+    el.textContent = `$${left.toFixed(2)}`;
+    el.className = 'rb-left ' + (left >= -0.01 ? 'ok' : 'over');
+  }
+  if(btn) btn.disabled = left < -0.01;
+}
+
+function resetRebalance(){
+  if(!currentUser) return;
+  rebalanceState[currentUser.name] = {...currentUser.holdings};
+  renderPortfolio();
+  showToast('Reset to original holdings','success');
+}
+
+function confirmRebalance(){
+  if(!currentUser) return;
+  const newHoldings = {};
+  Object.keys(TEAMS).forEach(team=>{
+    const id = 'rb_'+team.replace(/[^a-zA-Z]/g,'_');
+    const el = document.getElementById(id);
+    const qty = parseFloat(el?.value||'0');
+    if(qty>0) newHoldings[team]=qty;
+  });
+  rebalanceState[currentUser.name] = newHoldings;
+  const total = Object.entries(newHoldings).reduce((s,[t,q])=>s+(TEAMS[t]?.cur||0)*q,0);
+  showToast(`Portfolio rebalanced! New value: $${total.toFixed(2)}`,'success');
+}
+
+// ── AI TIPS ──
+async function loadAITips(){
+  const inv = currentUser;
+  if(!inv) return;
+  const tipsBody = document.getElementById('tipsBody');
+  tipsBody.innerHTML = `<div class="tips-loading">Generating AI tips<div class="dots-anim"><span>.</span><span>.</span><span>.</span></div></div>`;
+
+  // Build context
+  const holdingsSummary = Object.entries(inv.holdings).map(([t,q])=>{
+    const tm = TEAMS[t];
+    return `${t}: ${q} shares @ $${tm?.cur?.toFixed(2)||'N/A'} (vol: ${tm?((tm.vol||0)*100).toFixed(1):'?'}%)`;
+  }).join(', ');
+
+  const topGainers = Object.entries(TEAMS).filter(([,t])=>t.vol>0).sort((a,b)=>b[1].vol-a[1].vol).slice(0,3).map(([n])=>n).join(', ');
+  const topLosers = Object.entries(TEAMS).filter(([,t])=>t.vol<0).sort((a,b)=>a[1].vol-b[1].vol).slice(0,3).map(([n])=>n).join(', ');
+
+  const prompt = `You are an expert college basketball investment advisor for a March Madness fantasy stock market. 
+  
+Student investor: ${inv.name} (${inv.wave})
+Portfolio value: $${inv.portfolio_value.toFixed(2)} (${inv.change>=0?'+':''}${inv.pct_change.toFixed(2)}% this week)
+Rank: #${inv.rank} of 22 investors
+Current holdings: ${holdingsSummary}
+Budget: $500 starting, current value $${inv.portfolio_value.toFixed(2)}
+
+Market context:
+- Top gainers this week: ${topGainers}
+- Top losers this week: ${topLosers}  
+- March Madness tournament is now underway
+- Duke surged +8.2%, Florida +27.3% (major upset wins)
+- Saint Louis dropped -62.9%, Clemson -49.3% (early exits)
+- BYU down -25.5%, Kansas down -20.4%
+
+Give ${inv.name} exactly 4 specific, actionable investment tips in JSON format. Each tip must be an object with:
+- "type": one of "buy", "sell", "hold", or "info"  
+- "label": short 2-4 word title
+- "text": 1-2 sentence specific advice mentioning actual team names from their portfolio or the market
+
+Return ONLY a JSON array, no markdown, no explanation. Example format:
+[{"type":"sell","label":"Cut Your Losses","text":"Your advice here."},...]`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.find(b=>b.type==='text')?.text||'[]';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const tips = JSON.parse(clean);
+    tipsBody.innerHTML = tips.map(tip=>`
+      <div class="tip-card ${tip.type}">
+        <div class="tip-label ${tip.type}">${tip.type==='buy'?'▲ BUY':tip.type==='sell'?'▼ SELL':tip.type==='hold'?'◆ HOLD':'ℹ INFO'} · ${tip.label}</div>
+        <div class="tip-text">${tip.text}</div>
+      </div>`).join('');
+  } catch(e){
+    // fallback static tips
+    tipsBody.innerHTML = buildStaticTips(inv);
+  }
+}
+
+function buildStaticTips(inv){
+  const tips=[];
+  const losers = Object.entries(inv.holdings).filter(([t])=>TEAMS[t]&&TEAMS[t].vol<-0.2);
+  const gainers = Object.entries(TEAMS).filter(([t,d])=>d.vol>0.2&&!inv.holdings[t]);
+  if(losers.length>0){
+    const [t] = losers[0];
+    tips.push({type:'sell',label:'Cut Losses',text:`${t} is down ${(TEAMS[t].vol*100).toFixed(1)}% this week. With March Madness upsets possible, consider reducing your position to protect your portfolio.`});
+  }
+  if(gainers.length>0){
+    const [t] = gainers[0];
+    tips.push({type:'buy',label:'Momentum Play',text:`${t} is surging +${(TEAMS[t].vol*100).toFixed(1)}% and isn't in your portfolio. Strong tournament runs drive prices up — consider adding shares.`});
+  }
+  tips.push({type:'info',label:'March Madness Alert',text:'Tournament upsets cause massive price swings. Teams that win their first 2 games typically see 15-30% value increases. Track the bracket daily.'});
+  tips.push({type:'hold',label:'Stay Diversified',text:`With ${Object.keys(inv.holdings).length} holdings, you have reasonable spread. Avoid going all-in on one team during unpredictable tournament play.`});
+  return tips.map(tip=>`<div class="tip-card ${tip.type}"><div class="tip-label ${tip.type}">${tip.type==='buy'?'▲ BUY':tip.type==='sell'?'▼ SELL':tip.type==='hold'?'◆ HOLD':'ℹ INFO'} · ${tip.label}</div><div class="tip-text">${tip.text}</div></div>`).join('');
+}
+
+// ── VIEW SWITCHER ──
+function showView(id, btn){
+  if(id==='portfolio' && !currentUser) return;
+  document.querySelectorAll('.view').forEach(v=>{v.classList.remove('active');v.style.display='none'});
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const el = document.getElementById('view-'+id);
+  el.style.display='block';
+  el.classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='leaderboard') buildLeaderboard();
+}
+
+// ── TOAST ──
+function showToast(msg, type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(()=>t.className='toast',3000);
+}
+</script>
+</body>
+</html>
+    if (tips.length < 3) tips.push({type:'info', text:`Your portfolio rank is #${inv.rank}. Use your rebalance wisely — consider shifting into teams with tournament momentum.`});
+    if (tips.length < 4) tips.push({type:'info', text:`General strategy: Teams seeded 1-4 historically have the most stable values during March Madness.`});
+
+  return tips.slice(0,4).map(tip => `
+    <div class="tip-item">
+      <div><span class="tip-type ${tip.type}">${tip.type.toUpperCase()}</span></div>
+      <div class="tip-text">${tip.text}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════
+//  VIEWS
+// ══════════════════════════════════════════
+function showView(id, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'portfolio' && currentUser && currentUser !== '__admin__') buildPortfolioView();
+  if (id === 'market') buildMarket();
+  if (id === 'leaderboard') { buildStats(); buildLeaderboard(); }
+}
+
+function buildAll() {
+  buildTicker();
+  buildStats();
+  buildLeaderboard();
+  buildMarket();
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+buildTicker();
+buildLoginGrid();
+</script>
+</body>
+</html>
